@@ -1,0 +1,23 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 20px;
+}
+
+.right {
+  /* background-color: gray; */
+}
+.left {
+  cursor: pointer;
+}
+
+.card {
+  display: block;
+  min-height: 260px;
+  min-width: 100px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  padding: 30px;
+  margin: 30px;
+}

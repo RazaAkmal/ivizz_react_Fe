@@ -1,0 +1,21 @@
+/* ========= Login ======= */
+
+.siteCardBorder {
+  text-align: center;
+  padding: 100px;
+}
+.flexCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.flexbox {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8%;
+}
+.error-notif {
+  background-color: tomato;
+  color: white;
+}
