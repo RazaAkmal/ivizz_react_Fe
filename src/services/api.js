@@ -44,6 +44,28 @@ const apiService = {
     return data
   },
 
+  async fetchDetectionsData(token){
+    const url = `${configs.baseURL}/detections/search`
+
+    var rawBody = JSON.stringify({
+      "detection_type": "mask_detection",
+      "site_id": [1],
+      "timestamp": "2021-04-15T12:32:37.187Z",
+      "ignored": false
+    });
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `token ${token}`
+      },
+      body: rawBody
+    })
+    const data = await res.json()
+    return data
+  },
+
   async getSites() {
     // const url = `${this.baseUrl}/sites`
     // const res  = await fetch(url)

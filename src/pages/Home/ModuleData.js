@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import apiService from "../../services/api";
-import { Button } from 'antd'
+import { Button, Spin, notification } from 'antd'
 import MenuCard from "../../common/components/MenuCard";
+import DetectionSummary from "../../common/components/DetectionSummary";
+import { today, yesterday } from '../../common/HelperFunctions'
 
 class ModuleData extends Component {
 
@@ -10,35 +12,94 @@ class ModuleData extends Component {
     this.state = {
       subdomain: "",
       site: "",
-      siteIvModules: []
+      loading: false,
+      camerasWithDetections: [],
+      selectedDate: today()
+    }
+  }
+  
+  openNotification = (placement, type, msg) => {
+    notification[type]({
+      message: `Error`,
+      description: `${msg}!`,
+      placement,
+      duration: 3,
+      style: {backgroundColor: '#FFF2F0'}
+    });
+  };
+
+  componentDidMount(){
+    
+    apiService.checkAuthentication().then(res => {
+      if(!res){
+        this.props.history.push("/login")
+      }
+    })
+    
+    let { token, subdomain, site, loading } = this.state;
+    token = localStorage.getItem('token')
+    subdomain = localStorage.getItem('subdomain')
+    site = JSON.parse(localStorage.getItem('site'))
+
+    let storedDate = localStorage.getItem('date')
+    if(!storedDate){
+      storedDate = today()
+      localStorage.setItem("date", storedDate )
+    }
+
+    this.setState({ token, subdomain, site, selectedDate: new Date(storedDate), loading: true })
+
+    this.fetchDetections(token, site)
+    
+  }
+
+  async fetchDetections(token, site){
+    
+    try{
+      const response = await apiService.fetchDetectionsData(token)
+      
+      if (response.error) {
+        this.openNotification('topRight', 'error', 'Something went wrong. Please login again');
+        return
+      }
+      this.setState({ camerasWithDetections: response.cameras, loading: false })
+    }catch(err) {
+      console.log('-----err: ', err)
+      this.openNotification('topRight', 'error', 'Something went wrong. Please try again');
     }
   }
 
-  componentDidMount(){
-    let { siteIvModules } = this.state;
-    apiService.getSiteIvModules("gems").then(val => {
-      siteIvModules = val
-      this.setState({ subdomain: "gems", site: "gurgaon", siteIvModules })
-    });
-    
-    
+  handleDateChange = (e) => {
+    localStorage.setItem('date', e._d)
+    this.setState({ selectedDate: e._d })
   }
    
   render() {
-    let { subdomain, site, siteIvModules } = this.state;
+    let { loading, camerasWithDetections, subdomain, selectedDate } = this.state;
     return(
       <React.Fragment>
-        <span>module page</span>
-        {/* <MaskDetectSummary
-          showPercent={showPercent}
-          subDomin={subDomin}
-          percentToggle={percentToggle}
-          maskNonMask={maskNonMask}
-          maskToggle={maskToggle}
-          labels={labels}
-          data={dateDataWithWeights}
-          onDateChange={handleDateChange}
-          date={date} /> */}
+        {loading ? 
+          <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '10%'}}>
+            <Spin /> 
+          </div>
+          : 
+          <DetectionSummary
+            camerasWithDetections= {camerasWithDetections}
+            subdomain={subdomain}
+            onDateChange={this.handleDateChange}
+            date={selectedDate}
+
+/* 
+            showPercent={showPercent}
+            
+            percentToggle={percentToggle}
+            maskNonMask={maskNonMask}
+            maskToggle={maskToggle}
+            labels={labels}
+            data={dateDataWithWeights} */
+            
+            />
+        }
       </React.Fragment>
     )
   }
