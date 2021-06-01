@@ -12,7 +12,7 @@ import ModuleData from "../pages/Home/ModuleData";
 const authProtectedRoutes = [
   // Dashbaord
   { path: "/", component: Home },
-  { path: "/data", component: ModuleData },
+  { path: "/data/:id", component: ModuleData },
 
   // this route should be at the end of all other routes
   /* { path: "/", exact: true, component: () => <Redirect to="/dashboard" /> }, */

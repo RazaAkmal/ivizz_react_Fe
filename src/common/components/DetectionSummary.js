@@ -36,69 +36,82 @@ class DetectionSummary extends Component {
       showPercent: false,
       cameraData: {},
       labels: [],
-      datasets: {"complaint": [], "nonComplaint": []},
-      totalScore: 0
+      datasets: {"complaint": [], 'totalCompliantSum': 0, "nonComplaint": [], 'totalNonCompliantSum': 0,},
+      totalScore: 0,
+      graphData: {}
     }
   }
-  componentDidMount(){
+  async componentDidMount(){
     let valCompliance = localStorage.getItem('maskCompliance')
     if(valCompliance !== null)
       this.setState({ maskNonMask: valCompliance === "true" ? true : false })
 
-    this.calculateCameraData();
+    await this.calculateCameraData();
   }
 
-  calculateCameraData(){
+  async calculateCameraData(){
     let { maskNonMask, showPercent, labels, datasets } = this.state;
     let { camerasWithDetections } = this.props;
     
-    /*
-    return {
-      labels,
-      datasets: [
-        {
-          label: maskNonMask ? `Mask Compliance ${showPercent ? '%': ''}`:`Mask NonCompliance ${showPercent ? '%' : ''}` ,
-          data: data[0] && data[0].map(entry => {
-            if (showPercent && maskNonMask) {
-              return Math.round(entry[0] /data[1]  * 100) 
-            }
-            if (showPercent && !maskNonMask) {
-              return Math.round(entry[0] /data[2]  * 100) 
-            }
-            return entry[0]
-          }),
-          backgroundColor: "#0199A7"
-        }
-      ]
-    } */
-    
-    camerasWithDetections.map(element => {
+    let labelList = [];
+    let dummyDatasets = {"complaint": [], 'totalCompliantSum': 0, "nonComplaint": [], 'totalNonCompliantSum': 0};
 
-      let maskCompliantSum = 0
-      let nonMaskCompliantSum = 0
+    let totalMaskCompliantSum = 0
+    let totalNonMaskCompliantSum = 0
+
+    camerasWithDetections.map(element => {
       
       let { detections } = element
       let maskCompliantPeople = detections.map(detection => detection.media_url ? 1 : 0)
       let nonMaskCompliantPeople = detections.map(detection => detection.violation_count ? 1 : 0)
-      maskCompliantSum += sum(maskCompliantPeople)
-      nonMaskCompliantSum += sum(nonMaskCompliantPeople)
+      /* maskCompliantSum += sum(maskCompliantPeople)
+      nonMaskCompliantSum += sum(nonMaskCompliantPeople) */
 
-      labels.push(element.name);
-      datasets["complaint"].push(maskCompliantSum);
-      datasets["nonComplaint"].push(nonMaskCompliantSum);
+      labelList.push(element.name);
+      dummyDatasets["complaint"].push(sum(maskCompliantPeople));
+      dummyDatasets["nonComplaint"].push(sum(nonMaskCompliantPeople));
       
     })
 
-    this.setState({ labels, datasets })
+    totalMaskCompliantSum += sum(dummyDatasets["complaint"]);
+    totalNonMaskCompliantSum += sum(dummyDatasets["nonComplaint"]);
 
-    this.averageScore();
+    dummyDatasets["totalCompliantSum"] = totalMaskCompliantSum;
+    dummyDatasets["totalNonCompliantSum"] = totalNonMaskCompliantSum;
 
+    let data = {
+      "labels": labelList,
+      "datasets": [{
+        label: maskNonMask ? `Mask Compliance ${showPercent ? '%': ''}`:`Mask NonCompliance ${showPercent ? '%' : ''}` ,
+        // data: datasets['complaint'],
+        data: maskNonMask ? dummyDatasets['complaint'] && dummyDatasets['complaint'].map(entry => {
+              if (showPercent) {
+                return Math.round(entry /dummyDatasets['totalCompliantSum']  * 100) 
+              }
+              return entry
+            })
+            : dummyDatasets['nonComplaint'] && dummyDatasets['nonComplaint'].map(entry => {
+              if (showPercent) {
+                return Math.round(entry /dummyDatasets['totalNonCompliantSum']  * 100) 
+              }
+              return entry
+            }),
+        backgroundColor: "#0199A7"
+      }]
+    }
+
+
+    this.setState({ labels: labelList, datasets: dummyDatasets, graphData: data }, () => {
+      this.averageScore();
+    })
+    
   }
 
   averageScore() {
-    let { datasets } = this.state;
+    let { maskNonMask, datasets } = this.state;
 
-    const entries   = datasets["complaint"] && datasets["complaint"].map(entry => entry)
+    const entries   = maskNonMask ? datasets["complaint"] && datasets["complaint"].map(entry => entry)
+    : datasets["nonComplaint"] && datasets["nonComplaint"].map(entry => entry);
     const compacted = compact(entries)
     const total     = sum(compacted)
     const denom     = compacted.length || 1
@@ -110,12 +123,16 @@ class DetectionSummary extends Component {
     localStorage.setItem('maskCompliance', e.target.value)
     this.setState((state, props) => ({
       maskNonMask: !state.maskNonMask
-    }));
+    }), () => {
+      this.calculateCameraData();
+    });
   }
   percentToggle = () => {
     this.setState((state, props) => ({
       showPercent: !state.showPercent
-    }));
+    }), () => {
+      this.calculateCameraData();
+    });
   }
   handleChartClick = (ctx) => {
     if (!ctx || ctx.length == 0) return
@@ -125,7 +142,7 @@ class DetectionSummary extends Component {
    
   render() {
     let { camerasWithDetections, date, onDateChange } = this.props;
-    let { maskNonMask, showPercent, labels, datasets, totalScore } = this.state;
+    let { maskNonMask, showPercent, labels, datasets, totalScore, graphData } = this.state;
     return(
       <>
         <Row>
@@ -163,15 +180,7 @@ class DetectionSummary extends Component {
         </Col>
         <Col span={16}>
           <BarChart 
-            data={{
-              "labels": labels,
-              "datasets": [{
-                // "labels": labels, "datasets": datasets['complaint'], backgroundColor: "#0199A7"
-                label: maskNonMask ? `Mask Compliance ${showPercent ? '%': ''}`:`Mask NonCompliance ${showPercent ? '%' : ''}` ,
-                data: datasets['complaint'],
-                backgroundColor: "#0199A7"
-              }]
-            }}
+            data={graphData}
             handleChartClick={this.handleChartClick}
             options={options} />
         </Col>

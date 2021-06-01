@@ -73,7 +73,7 @@ class Home extends Component {
           {siteIvModules.map(item => {
             const name = item.iv_module.name
             const backgroundImage = `assets/logo.png`
-            return <MenuCard key={item.id} title={name} link={'/data'} backgroundImage={backgroundImage} />
+            return <MenuCard key={item.id} title={name} link={`/data/${item.id}`} backgroundImage={backgroundImage} />
           })}
         </div>
       </React.Fragment>

@@ -10,6 +10,7 @@ class ModuleData extends Component {
   constructor(props){
     super(props);
     this.state = {
+      token: "",
       subdomain: "",
       site: "",
       loading: false,
@@ -47,16 +48,18 @@ class ModuleData extends Component {
       localStorage.setItem("date", storedDate )
     }
 
-    this.setState({ token, subdomain, site, selectedDate: new Date(storedDate), loading: true })
+    this.setState({ token, subdomain, site, selectedDate: new Date(storedDate), loading: true }, () => {
+      this.fetchDetections()
+    })
 
-    this.fetchDetections(token, site)
-    
   }
 
-  async fetchDetections(token, site){
+  async fetchDetections(){
+    let { token, site, selectedDate } = this.state;
     
+    console.log("-------params id: ", this.props.match.params.id);
     try{
-      const response = await apiService.fetchDetectionsData(token)
+      const response = await apiService.fetchDetectionsData(token, site.id, selectedDate)
       
       if (response.error) {
         this.openNotification('topRight', 'error', 'Something went wrong. Please login again');
@@ -71,7 +74,9 @@ class ModuleData extends Component {
 
   handleDateChange = (e) => {
     localStorage.setItem('date', e._d)
-    this.setState({ selectedDate: e._d })
+    this.setState({ selectedDate: e._d, loading: true }, () => {
+      this.fetchDetections()
+    })
   }
    
   render() {

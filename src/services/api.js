@@ -1,4 +1,5 @@
 import configs from './configs'
+import moment from "moment";
 
 const apiService = {
 
@@ -44,13 +45,13 @@ const apiService = {
     return data
   },
 
-  async fetchDetectionsData(token){
+  async fetchDetectionsData(token, siteId, date){
     const url = `${configs.baseURL}/detections/search`
 
     var rawBody = JSON.stringify({
       "detection_type": "mask_detection",
-      "site_id": [1],
-      "timestamp": "2021-04-15T12:32:37.187Z",
+      "site_id": [siteId],
+      "timestamp": moment.utc(date).format("YYYY-MM-DD"),
       "ignored": false
     });
 
