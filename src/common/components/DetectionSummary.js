@@ -137,6 +137,8 @@ class DetectionSummary extends Component {
   handleChartClick = (ctx) => {
     if (!ctx || ctx.length == 0) return
 
+    const { _index, _chart } = ctx[0]
+    console.log("--------graphBar: ", ctx, _index, _chart);
     // this.props.history.push("/login")
   }
    

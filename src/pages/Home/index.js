@@ -61,19 +61,27 @@ class Home extends Component {
       this.openNotification('topRight', 'error', 'Something went wrong. Please try again');
     }
   }
+
+  logout(){
+    localStorage.clear();
+    this.props.history.push("/login")
+  }
    
   render() {
     let { subdomain, site, siteIvModules } = this.state;
     return(
       <React.Fragment>
-        <Button style={{ float: 'right', marginTop: '-5%', marginRight:'7%' }}>
+        <Button 
+          style={{ float: 'right', marginTop: '-5%', marginRight:'7%' }}
+          onClick={() => this.logout()}
+        >
           Logout</Button>
         {subdomain === "kara" ? <Button style={{ float: 'right', marginTop: '-5%', marginRight:'14%' }}>Go to Publish Page</Button> : null }
         <div className="flexbox">
           {siteIvModules.map(item => {
             const name = item.iv_module.name
             const backgroundImage = `assets/logo.png`
-            return <MenuCard key={item.id} title={name} link={`/data/${item.id}`} backgroundImage={backgroundImage} />
+            return <MenuCard key={item.id} title={name} link={`/data/${name.replace(" ", "-")}/${item.id}`} backgroundImage={backgroundImage} />
           })}
         </div>
       </React.Fragment>
