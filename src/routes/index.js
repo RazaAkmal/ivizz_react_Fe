@@ -14,7 +14,7 @@ const authProtectedRoutes = [
   // Dashbaord
   { path: "/", component: Home },
   { path: "/data/:name/:id", component: ModuleData },
-  { path: "/data/:name/:id/:camId", component: DetailedData },
+  { path: "/data/:name/:id/area/:camId", component: DetailedData },
 
   // this route should be at the end of all other routes
   /* { path: "/", exact: true, component: () => <Redirect to="/dashboard" /> }, */

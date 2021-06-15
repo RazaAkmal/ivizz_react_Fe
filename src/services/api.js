@@ -41,17 +41,30 @@ const apiService = {
     return data
   },
 
-  async fetchDetectionsData(token, siteId, date, type){
+  async fetchDetectionsData(token, siteId, date, type, camId){
     const url = `${configs.baseURL}/detections/search`
 
-    var rawBody = JSON.stringify({
-      "detection_type": type,
-      "site_id": [siteId],
-      "timestamp": moment.utc(date).format("YYYY-MM-DD"),
-      "ignored": false,
-      "page": 1,
-      "per_page": 20
-    });
+    var rawBody = JSON.stringify({})
+    if(camId) {
+      rawBody = JSON.stringify({
+        "detection_type": type,
+        "site_id": [siteId],
+        "camera_id": [camId],
+        "timestamp": moment.utc(date).format("YYYY-MM-DD"),
+        "ignored": false,
+        "page": 1,
+        "per_page": 400
+      });
+    } else {
+      rawBody = JSON.stringify({
+        "detection_type": type,
+        "site_id": [siteId],
+        "timestamp": moment.utc(date).format("YYYY-MM-DD"),
+        "ignored": false,
+        "page": 1,
+        "per_page": 20
+      });
+    }
 
     const res = await fetch(url, {
       method: "POST",

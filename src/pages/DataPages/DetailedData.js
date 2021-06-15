@@ -39,19 +39,17 @@ class DetailedData extends Component {
       site = ""
     } 
 
-    /* apiService.checkAuthentication(token, subdomain, site).then(res => {
+    apiService.checkAuthentication(token, subdomain, site).then(res => {
       if(!res){
         this.props.history.push("/login")
       }
-    }) */
+    })
 
     let storedDate = localStorage.getItem('date')
     if(!storedDate){
       storedDate = today()
       localStorage.setItem("date", storedDate )
     }
-
-    console.log("-------storedDate: ", storedDate);
 
     this.setState({ token, subdomain, site, selectedDate: new Date(storedDate), loading: true }, () => {
       this.fetchDetections()
@@ -62,14 +60,17 @@ class DetailedData extends Component {
   async fetchDetections(){
     let { token, site, selectedDate } = this.state;
     
+    console.log("-------params id: ", this.props.match.params.name);
+    let { name, camId } = this.props.match.params;
     try{
-      const response = await apiService.fetchDetectionsData(token, 16, selectedDate)
+      const response = await apiService.fetchDetectionsData(
+        token, site.id, selectedDate, name, Number(camId) )
       
       if (response.error) {
         this.openNotification('topRight', 'error', 'Something went wrong. Please login again');
         return
       }
-      this.setState({ detectionsData: response.cameras, loading: false })
+      this.setState({ camerasWithDetections: response.cameras, loading: false })
     }catch(err) {
       console.log('-----err: ', err)
       this.openNotification('topRight', 'error', 'Something went wrong. Please try again');

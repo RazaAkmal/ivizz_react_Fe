@@ -51,33 +51,31 @@ class ShowDetectionLinks extends Component {
 
   async calculateCameraData(){
     let { maskNonMask, showPercent, labels, datasets } = this.state;
-    let { detectionsData } = this.props;
+    let { camerasWithDetections } = this.props;
     
     let labelList = [];
     let dummyDatasets = {"complaint": [], 'totalCompliantSum': 0, "nonComplaint": [], 'totalNonCompliantSum': 0};
 
-    let totalMaskCompliantSum = 0
-    let totalNonMaskCompliantSum = 0
+    let totalCompliantSum = 0
+    let totalNonCompliantSum = 0
 
-    detectionsData.map(element => {
+    camerasWithDetections.map(element => {
       
-      let { detections } = element
-      let maskCompliantPeople = detections.map(detection => detection.media_url ? 1 : 0)
-      let nonMaskCompliantPeople = detections.map(detection => detection.violation_count ? 1 : 0)
-      /* maskCompliantSum += sum(maskCompliantPeople)
-      nonMaskCompliantSum += sum(nonMaskCompliantPeople) */
+      let { detections, detection_count } = element
+      /* let CompliantPeople = detections.map(detection => detection.media_url ? 1 : 0)
+      let nonCompliantPeople = detections.map(detection => detection.violation_count ? 1 : 0) */
 
-      labelList.push(element.name);
-      dummyDatasets["complaint"].push(sum(maskCompliantPeople));
-      dummyDatasets["nonComplaint"].push(sum(nonMaskCompliantPeople));
+      labelList.push(element.area_name);
+      dummyDatasets["complaint"].push(detection_count);
+      // dummyDatasets["nonComplaint"].push(sum(nonCompliantPeople));
       
     })
 
-    totalMaskCompliantSum += sum(dummyDatasets["complaint"]);
-    totalNonMaskCompliantSum += sum(dummyDatasets["nonComplaint"]);
+    totalCompliantSum += sum(dummyDatasets["complaint"]);
+    totalNonCompliantSum += sum(dummyDatasets["nonComplaint"]);
 
-    dummyDatasets["totalCompliantSum"] = totalMaskCompliantSum;
-    dummyDatasets["totalNonCompliantSum"] = totalNonMaskCompliantSum;
+    dummyDatasets["totalCompliantSum"] = totalCompliantSum;
+    dummyDatasets["totalNonCompliantSum"] = totalNonCompliantSum;
 
     let data = {
       "labels": labelList,
@@ -110,13 +108,11 @@ class ShowDetectionLinks extends Component {
   averageScore() {
     let { maskNonMask, datasets } = this.state;
 
-    const entries   = maskNonMask ? datasets["complaint"] && datasets["complaint"].map(entry => entry)
-    : datasets["nonComplaint"] && datasets["nonComplaint"].map(entry => entry);
-    const compacted = compact(entries)
-    const total     = sum(compacted)
-    const denom     = compacted.length || 1
+    const entries   = maskNonMask ? datasets["totalCompliantSum"] : datasets["totalNonCompliantSum"];
+    /* const compacted = compact(entries)
+    const total     = sum(compacted) */
     
-    this.setState({ totalScore: total })
+    this.setState({ totalScore: entries })
   }
 
   maskToggle = (e) => {

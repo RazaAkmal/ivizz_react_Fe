@@ -65,7 +65,7 @@ class ModuleData extends Component {
     let moduleType = this.props.match.params.name;
     try{
       const response = await apiService.fetchDetectionsData(
-        token, site.id, selectedDate, moduleType)
+        token, site.id, selectedDate, moduleType, "")
       
       if (response.error) {
         this.openNotification('topRight', 'error', 'Something went wrong. Please login again');
@@ -84,6 +84,12 @@ class ModuleData extends Component {
       this.fetchDetections()
     })
   }
+
+  navigateToCameraDetail(id){
+    let currentPath = this.props.history.location.pathname;
+    
+    this.props.history.push(`${currentPath}/area/${id}`)
+  }
    
   render() {
     let { loading, camerasWithDetections, subdomain, selectedDate } = this.state;
@@ -99,6 +105,7 @@ class ModuleData extends Component {
             subdomain={subdomain}
             onDateChange={this.handleDateChange}
             date={selectedDate}
+            navigateToDetail={(id) => this.navigateToCameraDetail(id)}
 
 /* 
             showPercent={showPercent}

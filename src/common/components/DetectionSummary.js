@@ -54,6 +54,7 @@ class DetectionSummary extends Component {
     let { camerasWithDetections } = this.props;
     
     let labelList = [];
+    let cameraIds = [];
     let dummyDatasets = {"complaint": [], 'totalCompliantSum': 0, "nonComplaint": [], 'totalNonCompliantSum': 0};
 
     let totalCompliantSum = 0
@@ -66,6 +67,7 @@ class DetectionSummary extends Component {
       let nonCompliantPeople = detections.map(detection => detection.violation_count ? 1 : 0) */
 
       labelList.push(element.area_name);
+      cameraIds.push(element.id);
       dummyDatasets["complaint"].push(detection_count);
       // dummyDatasets["nonComplaint"].push(sum(nonCompliantPeople));
       
@@ -79,6 +81,7 @@ class DetectionSummary extends Component {
 
     let data = {
       "labels": labelList,
+      "cameraIds": cameraIds,
       "datasets": [{
         label: maskNonMask ? `Mask Compliance ${showPercent ? '%': ''}`:`Mask NonCompliance ${showPercent ? '%' : ''}` ,
         // data: datasets['complaint'],
@@ -133,9 +136,10 @@ class DetectionSummary extends Component {
   handleChartClick = (ctx) => {
     if (!ctx || ctx.length == 0) return
 
-    const { _index, _chart } = ctx[0]
-    console.log("--------graphBar: ", ctx, _index, _chart);
-    // this.props.history.push("/login")
+    let { graphData } = this.state;
+    const { index, chart } = ctx[0]
+    this.props.navigateToDetail(graphData.cameraIds[index]);
+
   }
    
   render() {
