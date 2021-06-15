@@ -27,7 +27,7 @@ const options = {
   }
 }
 
-class DetectionSummary extends Component {
+class ShowDetectionLinks extends Component {
 
   constructor(props){
     super(props);
@@ -46,36 +46,38 @@ class DetectionSummary extends Component {
     if(valCompliance !== null)
       this.setState({ maskNonMask: valCompliance === "true" ? true : false })
 
-    await this.calculateCameraData();
+    // await this.calculateCameraData();
   }
 
   async calculateCameraData(){
     let { maskNonMask, showPercent, labels, datasets } = this.state;
-    let { camerasWithDetections } = this.props;
+    let { detectionsData } = this.props;
     
     let labelList = [];
     let dummyDatasets = {"complaint": [], 'totalCompliantSum': 0, "nonComplaint": [], 'totalNonCompliantSum': 0};
 
-    let totalCompliantSum = 0
-    let totalNonCompliantSum = 0
+    let totalMaskCompliantSum = 0
+    let totalNonMaskCompliantSum = 0
 
-    camerasWithDetections.map(element => {
+    detectionsData.map(element => {
       
-      let { detections, detection_count } = element
-      /* let CompliantPeople = detections.map(detection => detection.media_url ? 1 : 0)
-      let nonCompliantPeople = detections.map(detection => detection.violation_count ? 1 : 0) */
+      let { detections } = element
+      let maskCompliantPeople = detections.map(detection => detection.media_url ? 1 : 0)
+      let nonMaskCompliantPeople = detections.map(detection => detection.violation_count ? 1 : 0)
+      /* maskCompliantSum += sum(maskCompliantPeople)
+      nonMaskCompliantSum += sum(nonMaskCompliantPeople) */
 
-      labelList.push(element.area_name);
-      dummyDatasets["complaint"].push(detection_count);
-      // dummyDatasets["nonComplaint"].push(sum(nonCompliantPeople));
+      labelList.push(element.name);
+      dummyDatasets["complaint"].push(sum(maskCompliantPeople));
+      dummyDatasets["nonComplaint"].push(sum(nonMaskCompliantPeople));
       
     })
 
-    totalCompliantSum += sum(dummyDatasets["complaint"]);
-    totalNonCompliantSum += sum(dummyDatasets["nonComplaint"]);
+    totalMaskCompliantSum += sum(dummyDatasets["complaint"]);
+    totalNonMaskCompliantSum += sum(dummyDatasets["nonComplaint"]);
 
-    dummyDatasets["totalCompliantSum"] = totalCompliantSum;
-    dummyDatasets["totalNonCompliantSum"] = totalNonCompliantSum;
+    dummyDatasets["totalCompliantSum"] = totalMaskCompliantSum;
+    dummyDatasets["totalNonCompliantSum"] = totalNonMaskCompliantSum;
 
     let data = {
       "labels": labelList,
@@ -108,11 +110,13 @@ class DetectionSummary extends Component {
   averageScore() {
     let { maskNonMask, datasets } = this.state;
 
-    const entries   = maskNonMask ? datasets["totalCompliantSum"] : datasets["totalNonCompliantSum"];
-    /* const compacted = compact(entries)
-    const total     = sum(compacted) */
+    const entries   = maskNonMask ? datasets["complaint"] && datasets["complaint"].map(entry => entry)
+    : datasets["nonComplaint"] && datasets["nonComplaint"].map(entry => entry);
+    const compacted = compact(entries)
+    const total     = sum(compacted)
+    const denom     = compacted.length || 1
     
-    this.setState({ totalScore: entries })
+    this.setState({ totalScore: total })
   }
 
   maskToggle = (e) => {
@@ -139,21 +143,16 @@ class DetectionSummary extends Component {
   }
    
   render() {
-    let { camerasWithDetections, date, onDateChange } = this.props;
+    let { detectionsData, date, onDateChange } = this.props;
     let { maskNonMask, showPercent, labels, datasets, totalScore, graphData } = this.state;
     return(
       <>
         <Row>
-        <Col span={8}>
-          <div style={{ marginTop: "10%"}}>
-            <Row  style={{alignItems: "center", marginBottom: '20px', justifyContent: 'space-around', flexWrap: 'wrap'}}>
-              <Col style={{textAlign: "center"}}>
+          <Col span={10}>
+            <div style={{ marginTop: "5%", marginLeft: "20%" }}>
+              <Row>
                 <DateComponent onChange={onDateChange} date={date} />
-              </Col>
-            </Row>
-            <Row style={{alignItems: "center",marginTop: '10px', justifyContent: 'space-around', flexWrap: 'wrap'}}>
-              <Col style={{textAlign: "center"}}>
-                <div>
+                <div style={{marginLeft: "20px", marginTop: "5px"}} >
                   <Radio.Group
                     options={ComplianceOptions}
                     onChange={this.maskToggle}
@@ -161,31 +160,34 @@ class DetectionSummary extends Component {
                     optionType="button"
                   />
                 </div>
-                <div style={{ marginTop: '10px'}}>
-                  <Radio.Group
-                    options={ValueOptions}
-                    onChange={this.percentToggle}
-                    value={showPercent}
-                    optionType="button"
-                  />
-                </div>
-              </Col>
-            </Row>
+              </Row>
+            </div>
+            <div style={{ marginTop: "20%", marginLeft: "20%", maxWidth: "300px" }}>
+              <ScoreCard icon={"mask_detect"} title={"Total Violations"} dateString={date.toDateString()} score={totalScore} units={""} />
+            </div>
+          </Col>
+          <Col span={14}>
+            <div style={{ height: "400px", width: "800px" }}>
+              <BarChart 
+                data={graphData}
+                handleChartClick={this.handleChartClick}
+                options={options} 
+              />
+            </div>
+          </Col>
+        </Row>
+        {/* <Row>
+          <div style={{marginTop: '20px', marginLeft: '5%'}}>
+            <Button onClick={openAllLink} >Open All Links</Button>
+            { linksValue !== '' &&
+            <Button onClick={copyData} style={{marginLeft: '10px'}}>CopyData</Button>   
+            }
           </div>
-          <div style={{ marginTop: "20%", marginLeft: "20%", maxWidth: "300px" }}>
-            <ScoreCard icon={"mask_detect"} title={"Total Violations"} score={totalScore} units={""} />
-          </div>
-        </Col>
-        <Col span={16}>
-          <BarChart 
-            data={graphData}
-            handleChartClick={this.handleChartClick}
-            options={options} />
-        </Col>
-      </Row>
+          <Table columns={tableColumns} data={tableData} />
+        </Row> */}
       </>
     )
   }
 }
 
-export default withRouter(DetectionSummary);
+export default withRouter(ShowDetectionLinks);

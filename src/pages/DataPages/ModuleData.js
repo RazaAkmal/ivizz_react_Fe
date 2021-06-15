@@ -31,16 +31,20 @@ class ModuleData extends Component {
 
   componentDidMount(){
     
-    apiService.checkAuthentication().then(res => {
+    let { token, subdomain, site, loading } = this.state;
+    token = localStorage.getItem('token')
+    subdomain = localStorage.getItem('subdomain')
+    try {
+      site =  JSON.parse(localStorage.getItem('site'))
+    } catch (error) {
+      site = ""
+    } 
+
+    apiService.checkAuthentication(token, subdomain, site).then(res => {
       if(!res){
         this.props.history.push("/login")
       }
     })
-    
-    let { token, subdomain, site, loading } = this.state;
-    token = localStorage.getItem('token')
-    subdomain = localStorage.getItem('subdomain')
-    site = JSON.parse(localStorage.getItem('site'))
 
     let storedDate = localStorage.getItem('date')
     if(!storedDate){
@@ -57,9 +61,11 @@ class ModuleData extends Component {
   async fetchDetections(){
     let { token, site, selectedDate } = this.state;
     
-    console.log("-------params id: ", this.props.match.params.id);
+    console.log("-------params id: ", this.props.match.params.name);
+    let moduleType = this.props.match.params.name;
     try{
-      const response = await apiService.fetchDetectionsData(token, site.id, selectedDate)
+      const response = await apiService.fetchDetectionsData(
+        token, site.id, selectedDate, moduleType)
       
       if (response.error) {
         this.openNotification('topRight', 'error', 'Something went wrong. Please login again');

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import apiService from "../../services/api";
 import { Button, Spin, notification } from 'antd'
 import MenuCard from "../../common/components/MenuCard";
-import DetectionSummary from "../../common/components/DetectionSummary";
+import ShowDetectionLinks from "../../common/components/ShowDetectionLinks";
 import { today, yesterday } from '../../common/HelperFunctions'
 
 class DetailedData extends Component {
@@ -14,7 +14,7 @@ class DetailedData extends Component {
       subdomain: "",
       site: "",
       loading: false,
-      camerasWithDetections: [],
+      detectionsData: {},
       selectedDate: today()
     }
   }
@@ -29,24 +29,29 @@ class DetailedData extends Component {
     });
   };
 
-  componentDidMount(){
-    
-    apiService.checkAuthentication().then(res => {
-      if(!res){
-        this.props.history.push("/login")
-      }
-    })
-    
+  componentDidMount(){    
     let { token, subdomain, site, loading } = this.state;
     token = localStorage.getItem('token')
     subdomain = localStorage.getItem('subdomain')
-    site = JSON.parse(localStorage.getItem('site'))
+    try {
+      site =  JSON.parse(localStorage.getItem('site'))
+    } catch (error) {
+      site = ""
+    } 
+
+    /* apiService.checkAuthentication(token, subdomain, site).then(res => {
+      if(!res){
+        this.props.history.push("/login")
+      }
+    }) */
 
     let storedDate = localStorage.getItem('date')
     if(!storedDate){
       storedDate = today()
       localStorage.setItem("date", storedDate )
     }
+
+    console.log("-------storedDate: ", storedDate);
 
     this.setState({ token, subdomain, site, selectedDate: new Date(storedDate), loading: true }, () => {
       this.fetchDetections()
@@ -57,15 +62,14 @@ class DetailedData extends Component {
   async fetchDetections(){
     let { token, site, selectedDate } = this.state;
     
-    console.log("-------params id: ", this.props.match.params.id);
     try{
-      const response = await apiService.fetchDetectionsData(token, site.id, selectedDate)
+      const response = await apiService.fetchDetectionsData(token, 16, selectedDate)
       
       if (response.error) {
         this.openNotification('topRight', 'error', 'Something went wrong. Please login again');
         return
       }
-      this.setState({ camerasWithDetections: response.cameras, loading: false })
+      this.setState({ detectionsData: response.cameras, loading: false })
     }catch(err) {
       console.log('-----err: ', err)
       this.openNotification('topRight', 'error', 'Something went wrong. Please try again');
@@ -80,30 +84,22 @@ class DetailedData extends Component {
   }
    
   render() {
-    let { loading, camerasWithDetections, subdomain, selectedDate } = this.state;
+    let { loading, detectionsData, subdomain, selectedDate } = this.state;
     return(
       <React.Fragment>
         {loading ? 
           <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '10%'}}>
             <Spin /> 
           </div>
-          : 
-          <DetectionSummary
-            camerasWithDetections= {camerasWithDetections}
+          :
+          <> 
+          <ShowDetectionLinks
+            detectionsData= {detectionsData}
             subdomain={subdomain}
             onDateChange={this.handleDateChange}
             date={selectedDate}
-
-/* 
-            showPercent={showPercent}
-            
-            percentToggle={percentToggle}
-            maskNonMask={maskNonMask}
-            maskToggle={maskToggle}
-            labels={labels}
-            data={dateDataWithWeights} */
-            
-            />
+          />
+          </>
         }
       </React.Fragment>
     )

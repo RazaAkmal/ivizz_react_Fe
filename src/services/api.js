@@ -18,11 +18,7 @@ const apiService = {
     return data
   },
 
-  async checkAuthentication() {
-    let token = localStorage.getItem('token')
-    let subdomain = localStorage.getItem('subdomain')
-    let site = localStorage.getItem('site')
-
+  async checkAuthentication(token, subdomain, site) {
     if(token && subdomain && site){
       return true
     } else {
@@ -45,14 +41,16 @@ const apiService = {
     return data
   },
 
-  async fetchDetectionsData(token, siteId, date){
+  async fetchDetectionsData(token, siteId, date, type){
     const url = `${configs.baseURL}/detections/search`
 
     var rawBody = JSON.stringify({
-      "detection_type": "mask_detection",
+      "detection_type": type,
       "site_id": [siteId],
       "timestamp": moment.utc(date).format("YYYY-MM-DD"),
-      "ignored": false
+      "ignored": false,
+      "page": 1,
+      "per_page": 20
     });
 
     const res = await fetch(url, {

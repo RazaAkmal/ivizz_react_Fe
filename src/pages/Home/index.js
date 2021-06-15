@@ -29,16 +29,20 @@ class Home extends Component {
 
   componentDidMount(){
     
-    apiService.checkAuthentication().then(res => {
+    let { token, subdomain, site, loading } = this.state;
+    token = localStorage.getItem('token')
+    subdomain = localStorage.getItem('subdomain')
+    try {
+      site =  JSON.parse(localStorage.getItem('site'))
+    } catch (error) {
+      site = ""
+    } 
+
+    apiService.checkAuthentication(token, subdomain, site).then(res => {
       if(!res){
         this.props.history.push("/login")
       }
     })
-    
-    let { token, subdomain, site, loading } = this.state;
-    token = localStorage.getItem('token')
-    subdomain = localStorage.getItem('subdomain')
-    site = JSON.parse(localStorage.getItem('site'))
 
     this.setState({ token, subdomain, site, loading: true })
 
