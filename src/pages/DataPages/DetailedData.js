@@ -25,7 +25,8 @@ class DetailedData extends Component {
       description: `${msg}!`,
       placement,
       duration: 3,
-      style: {backgroundColor: '#FFF2F0'}
+      style: {backgroundColor: '#FFF2F0'},
+      moduleType: ""
     });
   };
 
@@ -58,10 +59,11 @@ class DetailedData extends Component {
   }
 
   async fetchDetections(){
-    let { token, site, selectedDate } = this.state;
+    let { token, site, selectedDate, moduleType } = this.state;
     
     console.log("-------params id: ", this.props.match.params.name);
     let { name, camId } = this.props.match.params;
+    moduleType = name;
     try{
       const response = await apiService.fetchDetectionsData(
         token, site.id, selectedDate, name, Number(camId) )
@@ -70,7 +72,7 @@ class DetailedData extends Component {
         this.openNotification('topRight', 'error', 'Something went wrong. Please login again');
         return
       }
-      this.setState({ camerasWithDetections: response.cameras, loading: false })
+      this.setState({ camerasWithDetections: response.cameras, loading: false, moduleType })
     }catch(err) {
       console.log('-----err: ', err)
       this.openNotification('topRight', 'error', 'Something went wrong. Please try again');
@@ -85,7 +87,7 @@ class DetailedData extends Component {
   }
    
   render() {
-    let { loading, detectionsData, subdomain, selectedDate } = this.state;
+    let { loading, detectionsData, subdomain, selectedDate, moduleType } = this.state;
     return(
       <React.Fragment>
         {loading ? 
@@ -99,6 +101,7 @@ class DetailedData extends Component {
             subdomain={subdomain}
             onDateChange={this.handleDateChange}
             date={selectedDate}
+            moduleType={moduleType}
           />
           </>
         }

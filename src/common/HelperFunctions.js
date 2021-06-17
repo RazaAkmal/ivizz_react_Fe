@@ -44,24 +44,6 @@ export function getStartingDate() {
   return isNaN(savedDate.getTime()) ? new Date("2021/03/25").getTime()/1000 : yesterday.getTime()/1000 
 }
 
-export function checkDateForJennex() {
-    const savedDate = new Date(localStorage.getItem('date'))
-  savedDate.setHours(0, 0, 0, 0);
-
-  const matchedDate = new Date('2021/05/04')
-  const ignoredDate1 = new Date('2021/04/28')
-  const ignoredDate2 = new Date('2021/04/29')
-  
-  if(+ignoredDate1 === +savedDate || +ignoredDate2 === +savedDate){
-    return "ignore"
-  }
-  if(savedDate > matchedDate){
-    return true;
-  } else {
-    return false;
-  }
-}
-
 export const isEmpty = (obj) => {
   for(var key in obj) {
     if(obj.hasOwnProperty(key))
@@ -80,6 +62,12 @@ export const openSecureLink = async (fileUrl) => {
   window.open(url)
 }
 
-export const calculateCompliance = (maskData) => {
-  return Math.floor((Math.random() * 100) + 1)
+export const extractModuleLabel = (label) => {
+  let capsWord = "";
+  let splittedStr = label.split("_");
+  splittedStr.forEach(element => {
+    capsWord += element.charAt(0).toUpperCase() + element.slice(1) + " ";
+  });
+
+  return capsWord;
 }

@@ -15,7 +15,8 @@ class ModuleData extends Component {
       site: "",
       loading: false,
       camerasWithDetections: [],
-      selectedDate: today()
+      selectedDate: today(),
+      moduleType: ""
     }
   }
   
@@ -59,10 +60,10 @@ class ModuleData extends Component {
   }
 
   async fetchDetections(){
-    let { token, site, selectedDate } = this.state;
+    let { token, site, selectedDate, moduleType } = this.state;
     
     console.log("-------params id: ", this.props.match.params.name);
-    let moduleType = this.props.match.params.name;
+    moduleType = this.props.match.params.name;
     try{
       const response = await apiService.fetchDetectionsData(
         token, site.id, selectedDate, moduleType, "")
@@ -71,7 +72,7 @@ class ModuleData extends Component {
         this.openNotification('topRight', 'error', 'Something went wrong. Please login again');
         return
       }
-      this.setState({ camerasWithDetections: response.cameras, loading: false })
+      this.setState({ camerasWithDetections: response.cameras, loading: false, moduleType })
     }catch(err) {
       console.log('-----err: ', err)
       this.openNotification('topRight', 'error', 'Something went wrong. Please try again');
@@ -92,7 +93,7 @@ class ModuleData extends Component {
   }
    
   render() {
-    let { loading, camerasWithDetections, subdomain, selectedDate } = this.state;
+    let { loading, camerasWithDetections, subdomain, selectedDate, moduleType } = this.state;
     return(
       <React.Fragment>
         {loading ? 
@@ -106,6 +107,7 @@ class ModuleData extends Component {
             onDateChange={this.handleDateChange}
             date={selectedDate}
             navigateToDetail={(id) => this.navigateToCameraDetail(id)}
+            moduleType={moduleType}
 
 /* 
             showPercent={showPercent}

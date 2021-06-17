@@ -62,7 +62,7 @@ const apiService = {
         "timestamp": moment.utc(date).format("YYYY-MM-DD"),
         "ignored": false,
         "page": 1,
-        "per_page": 20
+        "per_page": type === "mask_compliance" ? 400 : 20
       });
     }
 
