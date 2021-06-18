@@ -6,6 +6,9 @@ import DateComponent from "../../common/components/DateComponent";
 import BarChart from "../../common/components/BarChart";
 import { withRouter } from 'react-router-dom'
 import { sum, compact } from 'lodash'
+import { extractModuleLabel } from "../HelperFunctions";
+import { Table, Tag, Space } from 'antd';
+import { columns } from "../Constants";
 
 const ValueOptions = [
   { label: 'Show data in values', value: false },
@@ -35,62 +38,71 @@ class ShowDetectionLinks extends Component {
       maskNonMask: true,
       showPercent: false,
       cameraData: {},
-      labels: [],
-      datasets: {"complaint": [], 'totalCompliantSum': 0, "nonComplaint": [], 'totalNonCompliantSum': 0,},
       totalScore: 0,
       graphData: {}
     }
   }
   async componentDidMount(){
+    
     let valCompliance = localStorage.getItem('maskCompliance')
-    if(valCompliance !== null)
-      this.setState({ maskNonMask: valCompliance === "true" ? true : false })
+    if(valCompliance !== null){
+      this.setState({ maskNonMask: valCompliance === "true" ? true : false }, async () => {
+        await this.calculateCameraData();
+      })
+    } else {
+      await this.calculateCameraData();
+    }
 
-    // await this.calculateCameraData();
   }
 
   async calculateCameraData(){
-    let { maskNonMask, showPercent, labels, datasets } = this.state;
-    let { camerasWithDetections } = this.props;
+    let { maskNonMask, showPercent } = this.state;
+    let { detectionsData, moduleType } = this.props;
     
     let labelList = [];
-    let dummyDatasets = {"complaint": [], 'totalCompliantSum': 0, "nonComplaint": [], 'totalNonCompliantSum': 0};
+    let cameraIds = [];
+    let dummyDatasets = [];
+    let graphLabel = "";
 
-    let totalCompliantSum = 0
-    let totalNonCompliantSum = 0
+    console.log("------detectionsData: ",detectionsData);
 
-    camerasWithDetections.map(element => {
-      
+    detectionsData.map(element => {
       let { detections, detection_count } = element
-      /* let CompliantPeople = detections.map(detection => detection.media_url ? 1 : 0)
-      let nonCompliantPeople = detections.map(detection => detection.violation_count ? 1 : 0) */
+      let totalDetectionsPerCamera = 0;
 
+      if(moduleType === "mask_compliance"){
+        if(maskNonMask){
+          let dects = detections.map(detection => detection.details?.mask_detected === 1 ? 1 : 0)
+          totalDetectionsPerCamera = sum(dects);
+          graphLabel = `Mask Compliance ${showPercent ? '%': ''}`;
+        } else {
+          let dects = detections.map(detection => detection.details?.mask_detected === -1 ? 1 : 0)
+          totalDetectionsPerCamera = sum(dects);
+          graphLabel = `Mask NonCompliance ${showPercent ? '%': ''}`;
+        }
+      } else {
+        totalDetectionsPerCamera = detection_count;
+        graphLabel = `${extractModuleLabel(moduleType)} ${showPercent ? '%': ''}`;
+      }
+
+
+      ///////////////////////////////////////////////////////// for links
       labelList.push(element.area_name);
-      dummyDatasets["complaint"].push(detection_count);
-      // dummyDatasets["nonComplaint"].push(sum(nonCompliantPeople));
-      
+      cameraIds.push(element.id);
+      dummyDatasets.push(totalDetectionsPerCamera);
     })
 
-    totalCompliantSum += sum(dummyDatasets["complaint"]);
-    totalNonCompliantSum += sum(dummyDatasets["nonComplaint"]);
-
-    dummyDatasets["totalCompliantSum"] = totalCompliantSum;
-    dummyDatasets["totalNonCompliantSum"] = totalNonCompliantSum;
+    let totalDatasetSum = sum(dummyDatasets);
 
     let data = {
       "labels": labelList,
+      "cameraIds": cameraIds,
       "datasets": [{
-        label: maskNonMask ? `Mask Compliance ${showPercent ? '%': ''}`:`Mask NonCompliance ${showPercent ? '%' : ''}` ,
+        label: graphLabel,
         // data: datasets['complaint'],
-        data: maskNonMask ? dummyDatasets['complaint'] && dummyDatasets['complaint'].map(entry => {
+        data: dummyDatasets && dummyDatasets.map(entry => {
               if (showPercent) {
-                return Math.round(entry /dummyDatasets['totalCompliantSum']  * 100) 
-              }
-              return entry
-            })
-            : dummyDatasets['nonComplaint'] && dummyDatasets['nonComplaint'].map(entry => {
-              if (showPercent) {
-                return Math.round(entry /dummyDatasets['totalNonCompliantSum']  * 100) 
+                return Math.round(entry /totalDatasetSum  * 100) 
               }
               return entry
             }),
@@ -98,21 +110,7 @@ class ShowDetectionLinks extends Component {
       }]
     }
 
-
-    this.setState({ labels: labelList, datasets: dummyDatasets, graphData: data }, () => {
-      this.averageScore();
-    })
-    
-  }
-
-  averageScore() {
-    let { maskNonMask, datasets } = this.state;
-
-    const entries   = maskNonMask ? datasets["totalCompliantSum"] : datasets["totalNonCompliantSum"];
-    /* const compacted = compact(entries)
-    const total     = sum(compacted) */
-    
-    this.setState({ totalScore: entries })
+    this.setState({ graphData: data, totalScore: totalDatasetSum })
   }
 
   maskToggle = (e) => {
@@ -139,7 +137,7 @@ class ShowDetectionLinks extends Component {
   }
    
   render() {
-    let { detectionsData, date, onDateChange } = this.props;
+    let { detectionsData, date, onDateChange, moduleType } = this.props;
     let { maskNonMask, showPercent, labels, datasets, totalScore, graphData } = this.state;
     return(
       <>
@@ -149,12 +147,14 @@ class ShowDetectionLinks extends Component {
               <Row>
                 <DateComponent onChange={onDateChange} date={date} />
                 <div style={{marginLeft: "20px", marginTop: "5px"}} >
-                  <Radio.Group
-                    options={ComplianceOptions}
-                    onChange={this.maskToggle}
-                    value={maskNonMask}
-                    optionType="button"
-                  />
+                  {moduleType === "mask_compliance" ?
+                    <Radio.Group
+                      options={ComplianceOptions}
+                      onChange={this.maskToggle}
+                      value={maskNonMask}
+                      optionType="button"
+                    />
+                  : null }
                 </div>
               </Row>
             </div>
@@ -172,15 +172,19 @@ class ShowDetectionLinks extends Component {
             </div>
           </Col>
         </Row>
-        {/* <Row>
+        <Row>
           <div style={{marginTop: '20px', marginLeft: '5%'}}>
-            <Button onClick={openAllLink} >Open All Links</Button>
-            { linksValue !== '' &&
-            <Button onClick={copyData} style={{marginLeft: '10px'}}>CopyData</Button>   
-            }
+            <Button >Open All Links</Button>
+            
+            <Button style={{marginLeft: '10px'}}>CopyData</Button>   
+            
           </div>
-          <Table columns={tableColumns} data={tableData} />
-        </Row> */}
+        </Row>
+        <Row>  
+          <Col span={24}>
+            <Table columns={columns} data={[]} />
+          </Col>
+        </Row>
       </>
     )
   }

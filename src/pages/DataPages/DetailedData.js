@@ -72,7 +72,7 @@ class DetailedData extends Component {
         this.openNotification('topRight', 'error', 'Something went wrong. Please login again');
         return
       }
-      this.setState({ camerasWithDetections: response.cameras, loading: false, moduleType })
+      this.setState({ detectionsData: response.cameras, loading: false, moduleType })
     }catch(err) {
       console.log('-----err: ', err)
       this.openNotification('topRight', 'error', 'Something went wrong. Please try again');
