@@ -3,6 +3,7 @@ import apiService from "../../services/api";
 import { Button, notification } from 'antd'
 import MenuCard from "../../common/components/MenuCard";
 import { withRouter } from 'react-router-dom'
+import { extractModuleLabel } from "../../common/HelperFunctions";
 
 class Home extends Component {
 
@@ -85,7 +86,7 @@ class Home extends Component {
           {siteIvModules.map(item => {
             const name = item.iv_module.name
             const backgroundImage = `assets/logo.png`
-            return <MenuCard key={item.id} title={name} link={`/data/${name.replace(" ", "-")}/${item.id}`} backgroundImage={backgroundImage} />
+            return <MenuCard key={item.id} title={extractModuleLabel(name)} link={`/data/${name.replace(" ", "-")}/${item.id}`} backgroundImage={backgroundImage} />
           })}
         </div>
       </React.Fragment>

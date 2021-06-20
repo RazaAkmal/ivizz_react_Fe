@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
-import apiService from "../../services/api";
 import { Button, Spin, notification, Col, Row,Radio } from 'antd'
 import ScoreCard from "../../common/components/ScoreCard";
 import DateComponent from "../../common/components/DateComponent";
 import BarChart from "../../common/components/BarChart";
 import { withRouter } from 'react-router-dom'
 import { sum, compact } from 'lodash'
-import { extractModuleLabel } from "../HelperFunctions";
+import { extractModuleLabel, openSecureLink } from "../HelperFunctions";
 import { Table, Tag, Space } from 'antd';
-import { columns } from "../Constants";
+import moment from "moment";
 
 const ValueOptions = [
   { label: 'Show data in values', value: false },
@@ -30,6 +29,28 @@ const options = {
   }
 }
 
+const columns = [
+  {
+    title: 'DATE TIME',
+    key: 'timestamp',
+    render: data => <span>{ moment.utc(data.timestamp).format("DD/MM/YYYY, hh:mm:ss a")}</span>,
+  },
+  {
+    title: 'COUNT',
+    key: 'count',
+    render: data => <span>{data.urls.length}</span>,
+  },
+  {
+    title: 'VIDEO URL',
+    key: 'url',
+    render: data => <div>
+      {data.urls.length > 0 && data.urls.map((link, i) => 
+        <a style={{marginLeft: "5px"}} key={i} onClick={() => openSecureLink(link)} target='_blank'>Link</a>
+      )}
+    </div>
+  },  
+];
+
 class ShowDetectionLinks extends Component {
 
   constructor(props){
@@ -39,7 +60,8 @@ class ShowDetectionLinks extends Component {
       showPercent: false,
       cameraData: {},
       totalScore: 0,
-      graphData: {}
+      graphData: {},
+      detectionURLs: []
     }
   }
   async componentDidMount(){
@@ -63,8 +85,8 @@ class ShowDetectionLinks extends Component {
     let cameraIds = [];
     let dummyDatasets = [];
     let graphLabel = "";
-
-    console.log("------detectionsData: ",detectionsData);
+    let filteredDetections = [];
+    let detectionsList = []
 
     detectionsData.map(element => {
       let { detections, detection_count } = element
@@ -75,24 +97,27 @@ class ShowDetectionLinks extends Component {
           let dects = detections.map(detection => detection.details?.mask_detected === 1 ? 1 : 0)
           totalDetectionsPerCamera = sum(dects);
           graphLabel = `Mask Compliance ${showPercent ? '%': ''}`;
+          detectionsList = detections.filter(detection => detection.details?.mask_detected === 1 ? 1 : 0);
+          
         } else {
           let dects = detections.map(detection => detection.details?.mask_detected === -1 ? 1 : 0)
           totalDetectionsPerCamera = sum(dects);
           graphLabel = `Mask NonCompliance ${showPercent ? '%': ''}`;
+          detectionsList = detections.filter(detection => detection.details?.mask_detected === -1 ? 1 : 0);
         }
       } else {
         totalDetectionsPerCamera = detection_count;
         graphLabel = `${extractModuleLabel(moduleType)} ${showPercent ? '%': ''}`;
+        detectionsList = detections;
       }
-
-
-      ///////////////////////////////////////////////////////// for links
+      
       labelList.push(element.area_name);
       cameraIds.push(element.id);
       dummyDatasets.push(totalDetectionsPerCamera);
     })
 
     let totalDatasetSum = sum(dummyDatasets);
+    filteredDetections = this.findDetectionLinks(detectionsList)
 
     let data = {
       "labels": labelList,
@@ -110,7 +135,25 @@ class ShowDetectionLinks extends Component {
       }]
     }
 
-    this.setState({ graphData: data, totalScore: totalDatasetSum })
+    this.setState({ graphData: data, totalScore: totalDatasetSum, detectionURLs: filteredDetections  })
+  }
+
+  findDetectionLinks(detections){
+    let filteredDetections = [];
+
+    detections.forEach(item => {
+      let index = filteredDetections.findIndex(e => e.timestamp === item.timestamp);
+      if(index !== -1){
+        filteredDetections[index]["urls"].push(item.media_url);
+      } else {
+        filteredDetections.push({
+          "timestamp": item.timestamp,
+          "urls": [item.media_url]
+        })
+      }
+    });
+
+    return filteredDetections;
   }
 
   maskToggle = (e) => {
@@ -138,7 +181,8 @@ class ShowDetectionLinks extends Component {
    
   render() {
     let { detectionsData, date, onDateChange, moduleType } = this.props;
-    let { maskNonMask, showPercent, labels, datasets, totalScore, graphData } = this.state;
+    let { maskNonMask, showPercent, totalScore, graphData, detectionURLs } = this.state;
+
     return(
       <>
         <Row>
@@ -182,7 +226,7 @@ class ShowDetectionLinks extends Component {
         </Row>
         <Row>  
           <Col span={24}>
-            <Table columns={columns} data={[]} />
+            <Table columns={columns} dataSource={detectionURLs} />
           </Col>
         </Row>
       </>
