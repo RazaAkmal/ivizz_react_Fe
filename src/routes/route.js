@@ -1,7 +1,10 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
-import Header from "../common/components/Header";
-import Footer from "../common/components/Footer";
+import IvizzHeader from "../common/components/Header";
+import IvizzFooter from "../common/components/Footer";
+import "../pages/globalStyles.css";
+import { Layout } from 'antd';
+const { Header, Footer, Sider, Content } = Layout;
 
 const AppRoute = ({
 	component: Component,
@@ -20,9 +23,16 @@ const AppRoute = ({
 
 				return (
 					<React.Fragment>
-            <Header />
-						<div style={{ minHeight: "400px" }}> <Component {...props} /></div>
-            {/* <Footer /> */}
+            {/* <Header />
+						  <div style={{ minHeight: "400px" }}> <Component {...props} /></div>
+            <Footer /> */}
+            <Layout>
+              <Header className="layout-header"><IvizzHeader /></Header>
+              <Content className="layout-content">
+                <Component {...props} />
+              </Content>
+              <Footer className="layout-footer"><IvizzFooter /></Footer>
+            </Layout>
 					</React.Fragment>
 				);
 			}}
@@ -30,4 +40,3 @@ const AppRoute = ({
 	);
 
 export default AppRoute;
-

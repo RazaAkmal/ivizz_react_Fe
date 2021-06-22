@@ -30,7 +30,7 @@ class Login extends Component {
       if (response.error) {
         this.openNotification('topRight', 'error', 'Invalid credentials');
         return
-      } else if(response.data.subdomain && response.data.site) {
+      } else if(response.data.token && response.data.site) {
         const { token, subdomain, site } = response.data
         localStorage.setItem('token', token)
         localStorage.setItem('subdomain', subdomain)

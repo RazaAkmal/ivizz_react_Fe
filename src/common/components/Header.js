@@ -2,7 +2,7 @@ import { useEffect,useState } from 'react'
 import styles from '../style.css'
 import { Link, Redirect } from "react-router-dom";
 
-const Header = ({ logoUrl }) => {
+const IvizzHeader = ({ logoUrl }) => {
 
   const [subdomain, setSubdomain] = useState('')
   const [site, setSite] = useState('')
@@ -18,7 +18,7 @@ const Header = ({ logoUrl }) => {
     }
   })
   return (
-    <div className={styles.header}>
+    <div className="">
       {path === '' ?
         <Link to="/">
           <img className={styles.left} src='/assets/logo.png' alt="Ivizz Logo" width={120} height={120} />
@@ -33,4 +33,4 @@ const Header = ({ logoUrl }) => {
   )
 }
 
-export default Header
+export default IvizzHeader

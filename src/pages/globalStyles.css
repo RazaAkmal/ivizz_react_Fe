@@ -19,3 +19,19 @@
   background-color: tomato;
   color: white;
 }
+
+/* ======= ============ */
+
+.layout-header {
+  height: 20% !important;
+  background: #fff !important;
+  padding: 10px 30px !important;
+}
+.layout-footer {
+  height: 20% !important;
+}
+.layout-content {
+  height: 60% !important;
+  min-height: 500px !important;
+  background: #fff !important;
+}

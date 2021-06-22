@@ -60,7 +60,7 @@ class Home extends Component {
         this.openNotification('topRight', 'error', 'Something went wrong. Please login again');
         return
       }
-      this.setState({ siteIvModules: response, loading: false })
+      this.setState({ siteIvModules: response.site_iv_modules, loading: false })
     }catch(err) {
       console.log('-----err: ', err)
       this.openNotification('topRight', 'error', 'Something went wrong. Please try again');
@@ -86,7 +86,13 @@ class Home extends Component {
           {siteIvModules.map(item => {
             const name = item.iv_module.name
             const backgroundImage = `assets/logo.png`
-            return <MenuCard key={item.id} title={extractModuleLabel(name)} link={`/data/${name.replace(" ", "-")}/${item.id}`} backgroundImage={backgroundImage} />
+            return <MenuCard 
+                      key={item.id} 
+                      title={extractModuleLabel(name)}
+                      link={`/data/${name.replace(" ", "-")}/${item.id}`}
+                      backgroundImage={backgroundImage}
+                      cardIcon={item.image}
+                    />
           })}
         </div>
       </React.Fragment>

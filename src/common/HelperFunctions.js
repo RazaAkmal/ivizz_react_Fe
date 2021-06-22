@@ -60,6 +60,7 @@ export const openSecureLink = async (fileUrl) => {
   const data = await response.json()
   const { url } = data
   window.open(url)
+  return url
 }
 
 export const extractModuleLabel = (label) => {

@@ -61,7 +61,8 @@ class ShowDetectionLinks extends Component {
       cameraData: {},
       totalScore: 0,
       graphData: {},
-      detectionURLs: []
+      detectionURLs: [],
+      copyLinks: ""
     }
   }
   async componentDidMount(){
@@ -177,11 +178,42 @@ class ShowDetectionLinks extends Component {
     const { _index, _chart } = ctx[0]
     console.log("--------graphBar: ", ctx, _index, _chart);
     // this.props.history.push("/login")
+  } 
+  openAllLink = () => {
+    let { detectionURLs } = this.state;
+
+    let linkVal = ''
+    detectionURLs.forEach(row => {
+      row.urls.forEach(async (link) => {
+        // openSecureLink(link)
+        const linkUrl = await openSecureLink(link)
+        linkVal = `${linkVal} 
+        ${linkUrl}`
+      })
+    })
+    setTimeout(() => {
+      this.setState({ copyLinks: linkVal })
+    }, 3000); 
+    
+  } 
+
+  copyData = () => {
+    let { copyLinks } = this.state;
+    var dummy = document.createElement("textarea");
+    // to avoid breaking orgain page when copying more words
+    // cant copy when adding below this code
+    // dummy.style.display = 'none'
+    document.body.appendChild(dummy);
+    //Be careful if you use texarea. setAttribute('value', value), which works with "input" does not work with "textarea". – Eduard
+    dummy.value = copyLinks;
+    dummy.select(); 
+    document.execCommand("copy");
+    document.body.removeChild(dummy);
   }
-   
+
   render() {
     let { detectionsData, date, onDateChange, moduleType } = this.props;
-    let { maskNonMask, showPercent, totalScore, graphData, detectionURLs } = this.state;
+    let { maskNonMask, showPercent, totalScore, graphData, detectionURLs, copyLinks } = this.state;
 
     return(
       <>
@@ -218,9 +250,10 @@ class ShowDetectionLinks extends Component {
         </Row>
         <Row>
           <div style={{marginTop: '20px', marginLeft: '5%'}}>
-            <Button >Open All Links</Button>
-            
-            <Button style={{marginLeft: '10px'}}>CopyData</Button>   
+            <Button onClick={() => this.openAllLink()}>Open All Links</Button>
+            { copyLinks !== '' &&
+            <Button onClick={() => this.copyData()} style={{marginLeft: '10px'}}>CopyData</Button>
+            }
             
           </div>
         </Row>

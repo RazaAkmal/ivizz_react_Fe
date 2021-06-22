@@ -1,12 +1,9 @@
-const Footer = () => {
+const IvizzFooter = () => {
   const style = {
     background:"#e7e7e7",
     textAlign:"center",
     padding:"20px 0",
-    marginTop:"60px",
-    width:"100%" ,
-    position: "absolute",
-    bottom: 0
+    width:"100%" ,    
   }
 
   return (
@@ -18,4 +15,4 @@ const Footer = () => {
   )
 }
 
-export default Footer
+export default IvizzFooter

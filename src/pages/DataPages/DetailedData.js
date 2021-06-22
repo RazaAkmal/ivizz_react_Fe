@@ -14,7 +14,7 @@ class DetailedData extends Component {
       subdomain: "",
       site: "",
       loading: false,
-      detectionsData: {},
+      detectionsData: [],
       selectedDate: today()
     }
   }
