@@ -1,33 +1,13 @@
 import React, { Component } from 'react';
-import { Button, Spin, notification, Col, Row,Radio } from 'antd'
+import { Button, Spin, notification, Col, Row,Radio, Table, Tag, Space } from 'antd'
 import ScoreCard from "../../common/components/ScoreCard";
 import DateComponent from "../../common/components/DateComponent";
 import BarChart from "../../common/components/BarChart";
 import { withRouter } from 'react-router-dom'
 import { sum, compact } from 'lodash'
 import { extractModuleLabel, openSecureLink } from "../HelperFunctions";
-import { Table, Tag, Space } from 'antd';
 import moment from "moment";
-
-const ValueOptions = [
-  { label: 'Show data in values', value: false },
-  { label: 'Show data in %', value: true },
-];
-const ComplianceOptions = [
-  { label: 'Compliance', value: true },
-  { label: 'NonCompliance', value: false },
-];
-const options = {
-  scales: {
-    yAxes: [{
-      ticks: {
-        min: 0,
-        max: 100,
-        stepSize: 10
-      }
-    }]
-  }
-}
+import { ValueOptions, ComplianceOptions, ppeOptions, graphOptions } from "../Constant";
 
 const columns = [
   {
@@ -57,6 +37,7 @@ class ShowDetectionLinks extends Component {
     super(props);
     this.state = {
       maskNonMask: true,
+      ppeDetectVal: "apron",
       showPercent: false,
       cameraData: {},
       totalScore: 0,
@@ -66,15 +47,17 @@ class ShowDetectionLinks extends Component {
     }
   }
   async componentDidMount(){
-    
+
     let valCompliance = localStorage.getItem('maskCompliance')
+    let ppeButton = localStorage.getItem('ppeButton')
     if(valCompliance !== null){
-      this.setState({ maskNonMask: valCompliance === "true" ? true : false }, async () => {
-        await this.calculateCameraData();
-      })
-    } else {
-      await this.calculateCameraData();
+      this.setState({ maskNonMask: valCompliance === "true" ? true : false })
     }
+    if(ppeButton !== null){
+      this.setState({ ppeDetectVal: ppeButton, })
+    }
+
+    await this.calculateCameraData();
 
   }
 
@@ -93,24 +76,9 @@ class ShowDetectionLinks extends Component {
       let { detections, detection_count } = element
       let totalDetectionsPerCamera = 0;
 
-      if(moduleType === "mask_compliance"){
-        if(maskNonMask){
-          let dects = detections.map(detection => detection.details?.mask_detected === 1 ? 1 : 0)
-          totalDetectionsPerCamera = sum(dects);
-          graphLabel = `Mask Compliance ${showPercent ? '%': ''}`;
-          detectionsList = detections.filter(detection => detection.details?.mask_detected === 1 ? 1 : 0);
-          
-        } else {
-          let dects = detections.map(detection => detection.details?.mask_detected === -1 ? 1 : 0)
-          totalDetectionsPerCamera = sum(dects);
-          graphLabel = `Mask NonCompliance ${showPercent ? '%': ''}`;
-          detectionsList = detections.filter(detection => detection.details?.mask_detected === -1 ? 1 : 0);
-        }
-      } else {
-        totalDetectionsPerCamera = detection_count;
-        graphLabel = `${extractModuleLabel(moduleType)} ${showPercent ? '%': ''}`;
-        detectionsList = detections;
-      }
+      totalDetectionsPerCamera = detection_count;
+      graphLabel = `${extractModuleLabel(moduleType)} ${showPercent ? '%': ''}`;
+      detectionsList = detections;
       
       labelList.push(element.area_name);
       cameraIds.push(element.id);
@@ -162,7 +130,19 @@ class ShowDetectionLinks extends Component {
     this.setState((state, props) => ({
       maskNonMask: !state.maskNonMask
     }), () => {
-      this.calculateCameraData();
+      let detail = {};
+      detail['mask_detected'] = this.state.maskNonMask ? 1 : -1
+      this.props.handleChangeOptions(detail);
+    });
+  }
+  ppeToggle = (e) => {
+    localStorage.setItem('ppeButton', e.target.value)
+    this.setState((state, props) => ({
+      ppeDetectVal: e.target.value
+    }), () => {
+      let detail = {};
+      detail[e.target.value] = false
+      this.props.handleChangeOptions(detail);
     });
   }
   percentToggle = () => {
@@ -211,6 +191,35 @@ class ShowDetectionLinks extends Component {
     document.body.removeChild(dummy);
   }
 
+  renderModuleTypeOptions(moduleType) {
+    let { maskNonMask, ppeDetectVal } = this.state;
+
+    if(moduleType === "mask_compliance"){
+      return(
+        <div>
+          <Radio.Group
+            options={ComplianceOptions}
+            onChange={this.maskToggle}
+            value={maskNonMask}
+            optionType="button"
+          />
+        </div>
+      )
+    } else if(moduleType === "ppe_detect"){
+      return(
+        <div>
+          <Radio.Group
+            options={ppeOptions}
+            onChange={this.ppeToggle}
+            value={ppeDetectVal}
+            optionType="button"
+          />
+        </div>
+      )
+    }
+    
+  }
+
   render() {
     let { detectionsData, date, onDateChange, moduleType } = this.props;
     let { maskNonMask, showPercent, totalScore, graphData, detectionURLs, copyLinks } = this.state;
@@ -222,15 +231,8 @@ class ShowDetectionLinks extends Component {
             <div style={{ marginTop: "5%", marginLeft: "20%" }}>
               <Row>
                 <DateComponent onChange={onDateChange} date={date} />
-                <div style={{marginLeft: "20px", marginTop: "5px"}} >
-                  {moduleType === "mask_compliance" ?
-                    <Radio.Group
-                      options={ComplianceOptions}
-                      onChange={this.maskToggle}
-                      value={maskNonMask}
-                      optionType="button"
-                    />
-                  : null }
+                <div style={{ marginTop: "5px"}} >
+                  {this.renderModuleTypeOptions(moduleType)}
                 </div>
               </Row>
             </div>
@@ -243,7 +245,7 @@ class ShowDetectionLinks extends Component {
               <BarChart 
                 data={graphData}
                 handleChartClick={this.handleChartClick}
-                options={options} 
+                options={graphOptions} 
               />
             </div>
           </Col>

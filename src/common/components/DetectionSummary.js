@@ -6,27 +6,8 @@ import DateComponent from "../../common/components/DateComponent";
 import BarChart from "../../common/components/BarChart";
 import { withRouter } from 'react-router-dom'
 import { sum, compact } from 'lodash'
-import { extractModuleLabel } from "../HelperFunctions";
-
-const ValueOptions = [
-  { label: 'Show data in values', value: false },
-  { label: 'Show data in %', value: true },
-];
-const ComplianceOptions = [
-  { label: 'Compliance', value: true },
-  { label: 'NonCompliance', value: false },
-];
-const options = {
-  scales: {
-    yAxes: [{
-      ticks: {
-        min: 0,
-        max: 100,
-        stepSize: 10
-      }
-    }]
-  }
-}
+import { extractModuleLabel, checkModuleTypeAndFilterData } from "../HelperFunctions";
+import { ValueOptions, ComplianceOptions, ppeOptions, graphOptions } from "../Constant";
 
 class DetectionSummary extends Component {
 
@@ -34,6 +15,7 @@ class DetectionSummary extends Component {
     super(props);
     this.state = {
       maskNonMask: true,
+      ppeDetectVal: "apron",
       showPercent: false,
       cameraData: {},
       totalScore: 0,
@@ -43,13 +25,15 @@ class DetectionSummary extends Component {
   async componentDidMount(){
     
     let valCompliance = localStorage.getItem('maskCompliance')
+    let ppeButton = localStorage.getItem('ppeButton')
     if(valCompliance !== null){
-      this.setState({ maskNonMask: valCompliance === "true" ? true : false }, async () => {
-        await this.calculateCameraData();
-      })
-    } else {
-      await this.calculateCameraData();
+      this.setState({ maskNonMask: valCompliance === "true" ? true : false })
     }
+    if(ppeButton !== null){
+      this.setState({ ppeDetectVal: ppeButton, })
+    }
+
+    await this.calculateCameraData();
 
   }
 
@@ -61,26 +45,15 @@ class DetectionSummary extends Component {
     let cameraIds = [];
     let dummyDatasets = [];
     let graphLabel = "";
-
+    
     camerasWithDetections.map(element => {
       let { detections, detection_count } = element
       let totalDetectionsPerCamera = 0;
 
-      if(moduleType === "mask_compliance"){
-        if(maskNonMask){
-          let dects = detections.map(detection => detection.details?.mask_detected === 1 ? 1 : 0)
-          totalDetectionsPerCamera = sum(dects);
-          graphLabel = `Mask Compliance ${showPercent ? '%': ''}`;
-        } else {
-          let dects = detections.map(detection => detection.details?.mask_detected === -1 ? 1 : 0)
-          totalDetectionsPerCamera = sum(dects);
-          graphLabel = `Mask NonCompliance ${showPercent ? '%': ''}`;
-        }
-      } else {
-        totalDetectionsPerCamera = detection_count;
-        graphLabel = `${extractModuleLabel(moduleType)} ${showPercent ? '%': ''}`;
-      }
-
+      // let data = checkModuleTypeAndFilterData(moduleType, detections, maskNonMask, showPercent, detection_count);
+      
+      totalDetectionsPerCamera = detection_count;
+      graphLabel = `${extractModuleLabel(moduleType)} ${showPercent ? '%': ''}`;
 
       labelList.push(element.area_name);
       cameraIds.push(element.id);
@@ -113,7 +86,19 @@ class DetectionSummary extends Component {
     this.setState((state, props) => ({
       maskNonMask: !state.maskNonMask
     }), () => {
-      this.calculateCameraData();
+      let detail = {};
+      detail['mask_detected'] = this.state.maskNonMask ? 1 : -1
+      this.props.handleChangeOptions(detail);
+    });
+  }
+  ppeToggle = (e) => {
+    localStorage.setItem('ppeButton', e.target.value)
+    this.setState((state, props) => ({
+      ppeDetectVal: e.target.value
+    }), () => {
+      let detail = {};
+      detail[e.target.value] = false
+      this.props.handleChangeOptions(detail);
     });
   }
   percentToggle = () => {
@@ -130,6 +115,35 @@ class DetectionSummary extends Component {
     const { index, chart } = ctx[0]
     this.props.navigateToDetail(graphData.cameraIds[index]);
 
+  }
+
+  renderModuleTypeOptions(moduleType) {
+    let { maskNonMask, ppeDetectVal } = this.state;
+
+    if(moduleType === "mask_compliance"){
+      return(
+        <div>
+          <Radio.Group
+            options={ComplianceOptions}
+            onChange={this.maskToggle}
+            value={maskNonMask}
+            optionType="button"
+          />
+        </div>
+      )
+    } else if(moduleType === "ppe_detect"){
+      return(
+        <div>
+          <Radio.Group
+            options={ppeOptions}
+            onChange={this.ppeToggle}
+            value={ppeDetectVal}
+            optionType="button"
+          />
+        </div>
+      )
+    }
+    
   }
    
   render() {
@@ -148,16 +162,9 @@ class DetectionSummary extends Component {
             </Row>
             <Row style={{alignItems: "center",marginTop: '10px', justifyContent: 'space-around', flexWrap: 'wrap'}}>
               <Col style={{textAlign: "center"}}>
-                {moduleType === "mask_compliance" ?
-                  <div>
-                    <Radio.Group
-                      options={ComplianceOptions}
-                      onChange={this.maskToggle}
-                      value={maskNonMask}
-                      optionType="button"
-                    />
-                  </div>
-                : null }
+                
+                {this.renderModuleTypeOptions(moduleType)}
+                
                 <div style={{ marginTop: '10px'}}>
                   <Radio.Group
                     options={ValueOptions}
@@ -177,7 +184,7 @@ class DetectionSummary extends Component {
           <BarChart 
             data={graphData}
             handleChartClick={this.handleChartClick}
-            options={options} />
+            options={graphOptions} />
         </Col>
       </Row>
       </>

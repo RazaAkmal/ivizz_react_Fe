@@ -3,7 +3,7 @@ import apiService from "../../services/api";
 import { Button, Spin, notification } from 'antd'
 import MenuCard from "../../common/components/MenuCard";
 import DetectionSummary from "../../common/components/DetectionSummary";
-import { today, yesterday } from '../../common/HelperFunctions'
+import { today, decideDetailsParam } from '../../common/HelperFunctions'
 
 class ModuleData extends Component {
 
@@ -16,7 +16,8 @@ class ModuleData extends Component {
       loading: false,
       camerasWithDetections: [],
       selectedDate: today(),
-      moduleType: ""
+      moduleType: "",
+      detailOptions: {}
     }
   }
   
@@ -53,20 +54,28 @@ class ModuleData extends Component {
       localStorage.setItem("date", storedDate )
     }
 
-    this.setState({ token, subdomain, site, selectedDate: new Date(storedDate), loading: true }, () => {
+    let detailsData = {}
+    let valCompliance = localStorage.getItem('maskCompliance')
+    let ppeButton = localStorage.getItem('ppeButton')
+
+    if(this.props.match.params.name){
+      detailsData = decideDetailsParam(this.props.match.params.name, valCompliance, ppeButton)
+    }
+
+    this.setState({ token, subdomain, site, selectedDate: new Date(storedDate), loading: true, detailOptions: detailsData }, () => {
       this.fetchDetections()
     })
 
   }
 
   async fetchDetections(){
-    let { token, site, selectedDate, moduleType } = this.state;
+    let { token, site, selectedDate, moduleType, detailOptions } = this.state;
     
     console.log("-------params id: ", this.props.match.params.name);
     moduleType = this.props.match.params.name;
     try{
       const response = await apiService.fetchDetectionsData(
-        token, site.id, selectedDate, moduleType, "")
+        token, site.id, selectedDate, moduleType, "", detailOptions)
       
       if (response.error) {
         this.openNotification('topRight', 'error', 'Something went wrong. Please login again');
@@ -82,6 +91,12 @@ class ModuleData extends Component {
   handleDateChange = (e) => {
     localStorage.setItem('date', e._d)
     this.setState({ selectedDate: e._d, loading: true }, () => {
+      this.fetchDetections()
+    })
+  }
+
+  handleChangeOptions = (detail) => {
+    this.setState({ detailOptions: detail, loading: true }, () => {
       this.fetchDetections()
     })
   }
@@ -108,6 +123,7 @@ class ModuleData extends Component {
             date={selectedDate}
             navigateToDetail={(id) => this.navigateToCameraDetail(id)}
             moduleType={moduleType}
+            handleChangeOptions={this.handleChangeOptions}
 
 /* 
             showPercent={showPercent}

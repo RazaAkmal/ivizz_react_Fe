@@ -1,18 +1,5 @@
 import moment from "moment"
-
-export const lastFriday = () => {
-  const lastFriday  = new Date()
-  lastFriday.setDate(new Date().getDate() - 3)
-  lastFriday.setHours(0, 0, 0, 1)
-  return lastFriday
-}
-
-export const lastThursday = () => {
-  const lastThursday  = new Date()
-  lastThursday.setDate(new Date().getDate() - 4)
-  lastThursday.setHours(0, 0, 0, 1)
-  return lastThursday
-}
+import { sum } from 'lodash'
 
 export const yesterday = () => {
   const date = new Date()
@@ -71,4 +58,53 @@ export const extractModuleLabel = (label) => {
   });
 
   return capsWord;
+}
+
+export const checkModuleTypeAndFilterData = ( moduleType, detections, maskNonMask, showPercent, detection_count ) => {
+  let totalDetectionsPerCamera = 0;
+  let graphLabel = "";
+  let detectionsList = []
+
+  if(moduleType === "mask_compliance"){
+    if(maskNonMask){
+      let dects = detections.map(detection => detection.details?.mask_detected === 1 ? 1 : 0)
+      totalDetectionsPerCamera = sum(dects);
+      graphLabel = `Mask Compliance ${showPercent ? '%': ''}`;
+      detectionsList = detections.filter(detection => detection.details?.mask_detected === 1 ? 1 : 0);
+      
+    } else {
+      let dects = detections.map(detection => detection.details?.mask_detected === -1 ? 1 : 0)
+      totalDetectionsPerCamera = sum(dects);
+      graphLabel = `Mask NonCompliance ${showPercent ? '%': ''}`;
+      detectionsList = detections.filter(detection => detection.details?.mask_detected === -1 ? 1 : 0);
+    }
+  } else {
+    totalDetectionsPerCamera = detection_count;
+    graphLabel = `${extractModuleLabel(moduleType)} ${showPercent ? '%': ''}`;
+    detectionsList = detections;
+  }
+
+  return [totalDetectionsPerCamera, graphLabel, detectionsList]
+}
+
+export const decideDetailsParam = (moduleTtype, valCompliance, ppeButton) => {
+  let detailsData = {}
+
+  if(moduleTtype === "mask_compliance" ){
+    if(valCompliance) 
+        detailsData['mask_detected'] = valCompliance === "true" ? 1 : -1
+    else {
+      detailsData['mask_detected'] = 1
+      localStorage.setItem('maskCompliance', true)
+    }
+  } else if(moduleTtype === "ppe_detect" ){
+    if(ppeButton)
+        detailsData[ppeButton] = false
+    else {
+      detailsData["apron"] = false
+      localStorage.setItem('ppeButton', 'apron')
+    }
+  }
+
+  return detailsData;
 }

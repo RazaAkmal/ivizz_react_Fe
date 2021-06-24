@@ -41,7 +41,7 @@ const apiService = {
     return data
   },
 
-  async fetchDetectionsData(token, siteId, date, type, camId){
+  async fetchDetectionsData(token, siteId, date, type, camId, opt){
     const url = `${configs.baseURL}/detections/search`
 
     var rawBody = JSON.stringify({})
@@ -53,7 +53,8 @@ const apiService = {
         "timestamp": moment.utc(date).format("YYYY-MM-DD"),
         "ignored": false,
         "page": 1,
-        "per_page": 400
+        "per_page": 400,
+        "details": opt
       });
     } else {
       rawBody = JSON.stringify({
@@ -62,7 +63,8 @@ const apiService = {
         "timestamp": moment.utc(date).format("YYYY-MM-DD"),
         "ignored": false,
         "page": 1,
-        "per_page": type === "mask_compliance" ? 400 : 20
+        "per_page": type === "mask_compliance" ? 400 : 5,
+        "details": opt
       });
     }
 
