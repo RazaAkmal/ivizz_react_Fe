@@ -97,7 +97,7 @@ export const decideDetailsParam = (moduleTtype, valCompliance, ppeButton) => {
       detailsData['mask_detected'] = 1
       localStorage.setItem('maskCompliance', true)
     }
-  } else if(moduleTtype === "ppe_detect" ){
+  } else if(moduleTtype === "safety_detect" ){
     if(ppeButton)
         detailsData[ppeButton] = false
     else {
