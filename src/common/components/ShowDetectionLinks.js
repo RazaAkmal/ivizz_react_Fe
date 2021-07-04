@@ -223,6 +223,7 @@ class ShowDetectionLinks extends Component {
   render() {
     let { detectionsData, date, onDateChange, moduleType } = this.props;
     let { maskNonMask, showPercent, totalScore, graphData, detectionURLs, copyLinks } = this.state;
+    console.log("---------detectionURLs: ", detectionURLs);
 
     return(
       <>

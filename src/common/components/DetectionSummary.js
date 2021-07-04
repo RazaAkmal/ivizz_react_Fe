@@ -153,40 +153,84 @@ class DetectionSummary extends Component {
     return(
       <>
         <Row>
-        <Col span={8}>
-          <div style={{ marginTop: "10%"}}>
-            <Row  style={{alignItems: "center", marginBottom: '20px', justifyContent: 'space-around', flexWrap: 'wrap'}}>
-              <Col style={{textAlign: "center"}}>
-                <DateComponent onChange={onDateChange} date={date} />
+          <Col span={8}>
+            <div style={{ marginTop: "10%"}}>
+              <Row  style={{alignItems: "center", marginBottom: '20px', justifyContent: 'space-around', flexWrap: 'wrap'}}>
+                <Col style={{textAlign: "center"}}>
+                  <DateComponent onChange={onDateChange} date={date} />
+                </Col>
+              </Row>
+              <Row style={{alignItems: "center",marginTop: '10px', justifyContent: 'space-around', flexWrap: 'wrap'}}>
+                <Col style={{textAlign: "center"}}>
+                  
+                  {this.renderModuleTypeOptions(moduleType)}
+                  
+                  <div style={{ marginTop: '10px'}}>
+                    <Radio.Group
+                      options={ValueOptions}
+                      onChange={this.percentToggle}
+                      value={showPercent}
+                      optionType="button"
+                    />
+                  </div>
+                </Col>
+              </Row>
+            </div>
+            <div style={{ marginTop: "20%", marginLeft: "20%", maxWidth: "300px" }}>
+              <ScoreCard icon={"mask_detect"} title={"Total Violations"} score={totalScore} units={""} />
+            </div>
+          </Col>
+          <Col span={16}>
+            <BarChart 
+              data={graphData}
+              handleChartClick={this.handleChartClick}
+              options={graphOptions} />
+          </Col>
+        </Row>
+
+        {/* <Row>
+          <Col span={24}>
+            <Row style={{ marginBottom: "10%" }}>
+              <Col span={12}>
+                <div style={{ marginTop: "10%"}}>
+                  <Row  style={{alignItems: "center", marginBottom: '20px', justifyContent: 'space-around', flexWrap: 'wrap'}}>
+                    <Col style={{textAlign: "center"}}>
+                      <DateComponent onChange={onDateChange} date={date} />
+                    </Col>
+                  </Row>
+                  <Row style={{alignItems: "center",marginTop: '10px', justifyContent: 'space-around', flexWrap: 'wrap'}}>
+                    <Col style={{textAlign: "center"}}>
+                      
+                      {this.renderModuleTypeOptions(moduleType)}
+                      
+                      <div style={{ marginTop: '10px'}}>
+                        <Radio.Group
+                          options={ValueOptions}
+                          onChange={this.percentToggle}
+                          value={showPercent}
+                          optionType="button"
+                        />
+                      </div>
+                    </Col>
+                  </Row>
+                </div>
               </Col>
-            </Row>
-            <Row style={{alignItems: "center",marginTop: '10px', justifyContent: 'space-around', flexWrap: 'wrap'}}>
-              <Col style={{textAlign: "center"}}>
-                
-                {this.renderModuleTypeOptions(moduleType)}
-                
-                <div style={{ marginTop: '10px'}}>
-                  <Radio.Group
-                    options={ValueOptions}
-                    onChange={this.percentToggle}
-                    value={showPercent}
-                    optionType="button"
-                  />
+              <Col span={12}>
+                <div style={{ marginTop: "15%", marginLeft: "15%", maxWidth: "300px" }}>
+                  <ScoreCard icon={"mask_detect"} title={"Total Violations"} score={totalScore} units={""} />
                 </div>
               </Col>
             </Row>
-          </div>
-          <div style={{ marginTop: "20%", marginLeft: "20%", maxWidth: "300px" }}>
-            <ScoreCard icon={"mask_detect"} title={"Total Violations"} score={totalScore} units={""} />
-          </div>
-        </Col>
-        <Col span={16}>
-          <BarChart 
-            data={graphData}
-            handleChartClick={this.handleChartClick}
-            options={graphOptions} />
-        </Col>
-      </Row>
+            
+          </Col>
+          <Col span={22} style={{ margin: "auto" }}>
+            <BarChart 
+              data={graphData}
+              handleChartClick={this.handleChartClick}
+              options={graphOptions} />
+          </Col>
+        </Row> */}
+
       </>
     )
   }

@@ -21,3 +21,37 @@
   padding: 30px;
   margin: 30px;
 }
+
+
+/* =============== table ================== */
+table {
+  border-collapse: separate;
+  border-spacing: 1em;
+  width: 100%;
+  padding: 2% 5% 5% 5%;
+}
+
+td {
+  text-align: center;
+}
+
+th {
+  text-align: center;
+  text-transform: uppercase;
+}
+
+tbody tr {
+  border: 1px solid #3B97A4;
+  border-radius: 10px;
+  box-shadow: 0 0 3px 0 #3B97A4;
+}
+
+tr {
+  margin-bottom: 10%;
+  padding: 10px;
+  height: 50px;
+}
+
+tr:hover, tr:focus {
+  box-shadow: 0 0 6px 0 #3B97A4;
+}

@@ -79,9 +79,8 @@ class Home extends Component {
         <Button 
           style={{ float: 'right', marginTop: '-5%', marginRight:'7%' }}
           onClick={() => this.logout()}
-        >
-          Logout</Button>
-        {subdomain === "kara" ? <Button style={{ float: 'right', marginTop: '-5%', marginRight:'14%' }}>Go to Publish Page</Button> : null }
+        >Logout</Button>
+        
         <div className="flexbox">
           {siteIvModules.map(item => {
             const name = item.iv_module.name

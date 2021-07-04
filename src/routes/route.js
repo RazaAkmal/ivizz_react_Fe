@@ -4,7 +4,7 @@ import IvizzHeader from "../common/components/Header";
 import IvizzFooter from "../common/components/Footer";
 import "../pages/globalStyles.css";
 import { Layout } from 'antd';
-const { Header, Footer, Sider, Content } = Layout;
+const { Header, Footer, Content } = Layout;
 
 const AppRoute = ({
 	component: Component,
