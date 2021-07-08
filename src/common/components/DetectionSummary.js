@@ -131,7 +131,7 @@ class DetectionSummary extends Component {
           />
         </div>
       )
-    } else if(moduleType === "ppe_detect"){
+    } else if(moduleType === "safety_detect"){
       return(
         <div>
           <Radio.Group

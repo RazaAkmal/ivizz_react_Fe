@@ -254,15 +254,15 @@ class ShowDetectionLinks extends Component {
         <Row>
           <div style={{marginTop: '20px', marginLeft: '5%'}}>
             <Button onClick={() => this.openAllLink()}>Open All Links</Button>
-            { copyLinks !== '' &&
+            {/* { copyLinks !== '' &&
             <Button onClick={() => this.copyData()} style={{marginLeft: '10px'}}>CopyData</Button>
-            }
+            } */}
             
           </div>
         </Row>
         <Row>  
           <Col span={24}>
-            <Table columns={columns} dataSource={detectionURLs} />
+            <Table className="links-table" columns={columns} dataSource={detectionURLs} pagination={false} />
           </Col>
         </Row>
       </>

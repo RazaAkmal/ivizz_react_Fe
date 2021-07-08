@@ -77,7 +77,7 @@ class Home extends Component {
     return(
       <React.Fragment>
         <Button 
-          style={{ float: 'right', marginTop: '-5%', marginRight:'7%' }}
+          style={{ float: 'right', marginRight:'7%' }}
           onClick={() => this.logout()}
         >Logout</Button>
         

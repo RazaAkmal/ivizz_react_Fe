@@ -2,16 +2,19 @@ import { useEffect,useState } from 'react'
 import styles from '../style.css'
 import { Link, Redirect } from "react-router-dom";
 import { Row, Col } from 'antd';
+import configs from "../../services/configs";
 
 const IvizzHeader = ({ logoUrl }) => {
 
   const [subdomain, setSubdomain] = useState('')
+  const [logo, setLogo] = useState('')
   const [site, setSite] = useState('')
   const [path, setPath] = useState('')
 
   useEffect(() => {
     const path = window.location.pathname
     setSubdomain(localStorage.getItem('subdomain'))
+    setLogo(localStorage.orgLogo)
     setSite(localStorage.getItem('site'))
   })
 
@@ -34,14 +37,16 @@ const IvizzHeader = ({ logoUrl }) => {
           <img className={styles.left} src='/assets/logo.png' alt="Ivizz Logo" width={120} height={120} />
         </Link>
       </Col>
-      {subdomain ? 
-      <Col span={8} style={{ textAlign: "center" }}>
-        <h2>{subdomain}</h2>
-      </Col>
+      {subdomain && subdomain !== "null" ? 
+        <Col span={8} style={{ textAlign: "center" }}>
+          <h2>{subdomain.toUpperCase()}</h2>
+        </Col>
       : null }
-      {/* <Col span={8} style={{ textAlign: "end" }}>
-        <img className={styles.left} src='/assets/logo.png' alt="Ivizz Logo" width={120} height={120} />
-      </Col> */}
+      {logo && logo !== "null" ?
+        <Col span={8} style={{ textAlign: "end" }}>
+          <img className={styles.left} src={configs.baseURL + logo} alt="Ivizz Logo" width={120} height={120} />
+        </Col>
+      : null }
     </Row>
   )
 }
