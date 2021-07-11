@@ -108,3 +108,14 @@ export const decideDetailsParam = (moduleTtype, valCompliance, ppeButton) => {
 
   return detailsData;
 }
+
+export const getIvModuleIcon = (params) => {
+  let ivModules = localStorage.getItem("ivModules") ? JSON.parse(localStorage.getItem("ivModules")) : null;
+  
+  if(params.id && ivModules && ivModules.length){
+    let index = ivModules.findIndex(e => e.id == params.id);
+    if(index !== -1){
+      return ivModules[index].image
+    }
+  }
+}

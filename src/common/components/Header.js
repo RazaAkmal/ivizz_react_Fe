@@ -1,5 +1,5 @@
 import { useEffect,useState } from 'react'
-import styles from '../style.css'
+import '../style.css'
 import { Link, Redirect } from "react-router-dom";
 import { Row, Col } from 'antd';
 import configs from "../../services/configs";
@@ -34,17 +34,18 @@ const IvizzHeader = ({ logoUrl }) => {
     <Row justify="space-between" align="middle">
       <Col span={8}>
         <Link to="/">
-          <img className={styles.left} src='/assets/logo.png' alt="Ivizz Logo" width={120} height={120} />
+          <img className="logo-image left" src='/assets/logo.png' alt="Ivizz Logo"/>
         </Link>
       </Col>
-      {subdomain && subdomain !== "null" ? 
-        <Col span={8} style={{ textAlign: "center" }}>
-          <h2>{subdomain.toUpperCase()}</h2>
-        </Col>
-      : null }
       {logo && logo !== "null" ?
         <Col span={8} style={{ textAlign: "end" }}>
-          <img className={styles.left} src={configs.baseURL + logo} alt="Ivizz Logo" width={120} height={120} />
+          <div className="logo-image right">
+            <img className="logo-image right" src={configs.baseURL + logo} alt="Ivizz Logo" style={{ width: '100%' }} />
+            {subdomain && subdomain !== "null" ? 
+              <span style={{ display: "flex", justifyContent: "center", lineHeight: "2rem", color: "#0199A7" }}>
+              {subdomain.toUpperCase()}</span>
+            : null }
+          </div>
         </Col>
       : null }
     </Row>

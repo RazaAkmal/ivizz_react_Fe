@@ -60,6 +60,7 @@ class Home extends Component {
         this.openNotification('topRight', 'error', 'Something went wrong. Please login again');
         return
       }
+      localStorage.setItem("ivModules", JSON.stringify(response.site_iv_modules))
       this.setState({ siteIvModules: response.site_iv_modules, loading: false })
     }catch(err) {
       console.log('-----err: ', err)

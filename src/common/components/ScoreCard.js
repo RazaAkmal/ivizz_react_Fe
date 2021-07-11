@@ -1,12 +1,13 @@
 import React from 'react'
 import { Col, Row,Card } from 'antd';
+import configs from "../../services/configs";
 
 export default function ScoreCard({ icon, title, dateString, score, units }) {
   return (
     <Card style={{ borderColor: "#0199a7", maxWidth: "450px", borderRadius: "10px" }}>
       <Row>
         <Col span={12}>
-          <img width={50} height={50} src={`/images/ivizz/${icon}.png`} />
+          <img width={50} height={50} src={configs.baseURL + icon} />
         </Col>
         <Col  span={12} style={{lineHeight: '80%'}}>
           {dateString ? <h4 style={{color: '#0199A7'}}>{dateString}</h4> : ""}

@@ -6,7 +6,7 @@ import DateComponent from "../../common/components/DateComponent";
 import BarChart from "../../common/components/BarChart";
 import { withRouter } from 'react-router-dom'
 import { sum, compact } from 'lodash'
-import { extractModuleLabel, checkModuleTypeAndFilterData } from "../HelperFunctions";
+import { extractModuleLabel, getIvModuleIcon } from "../HelperFunctions";
 import { ValueOptions, ComplianceOptions, ppeOptions, graphOptions } from "../Constant";
 
 class DetectionSummary extends Component {
@@ -34,7 +34,6 @@ class DetectionSummary extends Component {
     }
 
     await this.calculateCameraData();
-
   }
 
   async calculateCameraData(){
@@ -177,7 +176,7 @@ class DetectionSummary extends Component {
               </Row>
             </div>
             <div style={{ marginTop: "20%", marginLeft: "20%", maxWidth: "300px" }}>
-              <ScoreCard icon={"mask_detect"} title={"Total Violations"} score={totalScore} units={""} />
+              <ScoreCard icon={getIvModuleIcon(this.props.match.params)} title={"Total Violations"} score={totalScore} units={""} />
             </div>
           </Col>
           <Col span={16}>

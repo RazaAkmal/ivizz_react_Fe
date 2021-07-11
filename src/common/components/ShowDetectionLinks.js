@@ -5,7 +5,7 @@ import DateComponent from "../../common/components/DateComponent";
 import BarChart from "../../common/components/BarChart";
 import { withRouter } from 'react-router-dom'
 import { sum, compact } from 'lodash'
-import { extractModuleLabel, openSecureLink } from "../HelperFunctions";
+import { extractModuleLabel, openSecureLink, getIvModuleIcon } from "../HelperFunctions";
 import moment from "moment";
 import { ValueOptions, ComplianceOptions, ppeOptions, graphOptions } from "../Constant";
 
@@ -238,7 +238,7 @@ class ShowDetectionLinks extends Component {
               </Row>
             </div>
             <div style={{ marginTop: "20%", marginLeft: "20%", maxWidth: "300px" }}>
-              <ScoreCard icon={"mask_detect"} title={"Total Violations"} dateString={date.toDateString()} score={totalScore} units={""} />
+              <ScoreCard icon={getIvModuleIcon(this.props.match.params)} title={"Total Violations"} dateString={date.toDateString()} score={totalScore} units={""} />
             </div>
           </Col>
           <Col span={14}>
