@@ -62,7 +62,7 @@ class Login extends Component {
 
     return (
       <div className="siteCardBorder flexCenter">
-        <Card title="Welcome To Ivizz testing....." style={{ minWidth: 700}}>
+        <Card title="Welcome To Ivizz testing11....." style={{ minWidth: 700}}>
           <Form
             {...layout}
             name="basic"
